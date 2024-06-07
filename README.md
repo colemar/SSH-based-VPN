@@ -5,10 +5,7 @@ Optional: use the VPN to access the Internet from the client using the server pu
 ### Build the point-to-point VPN
 1. **Enable tunneling on server side:**
    - Log in as root or use `sudo`.
-   - Edit `/etc/ssh/sshd_config` and add the following line:
-     ```SSH Config
-     PermitTunnel yes
-     ```
+   - Edit `/etc/ssh/sshd_config` and add the following line: `PermitTunnel yes`
    - Restart sshd service: `systemctl restart sshd`
    - Create a tunnel device owned by a regular user: `openvpn --mktun --dev tun1 --user username2`
    - Check tunnel device ownership: `ip -d link show tun1` (look for "user username2" in third line)
@@ -58,11 +55,7 @@ In order to make client's Internet traffic go through the VPN and appear as comi
      # Drop all other traffic that shouldn't be forwarded
      iptables -A FORWARD -j DROP
      ```
-   - Persist these iptables settings after reboot:
-     ```
-     apt install iptables-persistent
-     
-     ```
+   - Persist these iptables settings after reboot: `apt install iptables-persistent`
 
 2. **Amend routing table on client side:**
    - Log in as root or use `sudo`.
