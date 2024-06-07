@@ -46,7 +46,7 @@ In order to make client's Internet traffic go through the VPN and appear as comi
    - Avoid having to reboot in order to make the above setting effective: `sysctl -w net.ipv4.ip_forward=1`
    - Alternative to sysctl: `echo 1 > /proc/sys/net/ipv4/ip_forward`
    - Enable masquerading: `iptables -t nat -A POSTROUTING -o <if-name> -j MASQUERADE`. Here \<if-name\> (usually `eth0`) is the physical device attached to the public external network (see `ip route list default`).
-   - Configure forwarding rules. By default, iptables will forward all traffic unconditionally. You probably want to restrict inbound traffic from the internet, but allow all outgoing:
+   - Optional: configure forwarding rules. By default, iptables will forward all traffic unconditionally. You probably want to restrict inbound traffic from the internet, but allow all outgoing:
      ```
      # Allow traffic from internal to external
      iptables -A FORWARD -i tun1 -o eth0 -j ACCEPT
