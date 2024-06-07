@@ -37,4 +37,5 @@ Tunnel IP packets in a SSH channel.
    - On client: `ping 10.1.0.2`
 
 At this point **tun1** on client side along with the **ssh channel** and **tun1** on server side form a **Virtual Private Network** 10.1.0.0/22 (range 10.1.0.0 to 10.1.0.3).
+
 In order to make client's Internet traffic go through the VPN and appear as coming from the server IP, it is necessary to enable routing and masquerating (NAT) on the server and augment the routing table on the client.
