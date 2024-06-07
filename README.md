@@ -1,5 +1,6 @@
 ## Overview
-Tunnel IP packets in a SSH channel.
+Tunnel IP packets in a SSH channel and get a point-to-point VPN.
+Optional: use the VPN to access the Internet from the client using the server public IP address.
 
 ### Steps
 1. **Enable tunneling on server side:**
@@ -29,7 +30,7 @@ Tunnel IP packets in a SSH channel.
 
 4. **Turn on the ssh tunnel on client side:**
    - Log in as username1.
-   - Start a background session: `ssh -f -w 1:1 username2@<server-ip-address> true`
+   - Start a background ssh session: `ssh -f -w 1:1 username2@<server-ip-address> true`
    - Check that the ssh process is still there: `pgrep -u username1 -a ssh`
    
 5. **Check connectivity:**
@@ -38,4 +39,11 @@ Tunnel IP packets in a SSH channel.
 
 At this point **tun1** on client side along with the **ssh channel** and **tun1** on server side form a **Virtual Private Network** 10.1.0.0/22 (range 10.1.0.0 to 10.1.0.3).
 
-In order to make client's Internet traffic go through the VPN and appear as coming from the server IP, it is necessary to enable routing and masquerating (NAT) on the server and augment the routing table on the client.
+In order to make client's Internet traffic go through the VPN and appear as coming from the server IP, it is necessary to enable routing and masquerating (NAT) on the server and amend the routing table on the client.
+
+/etc/sysctl.conf
+net.ipv4.ip_forward=1
+sysctl -w net.ipv4.ip_forward=1
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
