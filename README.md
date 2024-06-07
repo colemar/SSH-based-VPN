@@ -47,3 +47,17 @@ sysctl -w net.ipv4.ip_forward=1
 echo 1 > /proc/sys/net/ipv4/ip_forward
 
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+5. **Adjust route table on client side:**
+   - Login as root or use `sudo`.
+   - Add host route for remote server (this is to protect the above ssh session):
+   ```
+   ip route add <server-ip-address> via <gateway-ip-address> dev <if-name>
+   ```
+   where <if-name> is most likely `eth0` and <gateway-ip-address> is the same as the existing default route (see `ip route list default`).
+   - Add global network routes through the tunnel:
+   ```
+   route add 127.0.0.0/1 dev tun1
+   route add 0.0.0.0/1 dev tun1
+   ```
+   
