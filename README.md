@@ -1,23 +1,14 @@
-# Recipe: Persistent Network Configuration in WSL 2 using Hyper-V Virtual Switch
-
-## Problem Description
-Connecting to services running in WSL 2 from external sources can be challenging due to the instances being on a different network. This guide offers a solution to replace the internal virtual switch of WSL 2 with an external version in Windows 20H2 (WSL 2.0) and configure it for better networking control.
-
-**Unfortunately the [original recipe](https://github.com/Unsigned-Char/WSL2HyperVSwitch) doesn't work in Windows 10 (at least for me) because setting `networkingMode = bridged` causes an error at WSL boot.
-Apparently _bridged_ networking mode stopped working with WSL version 2.1.5.0**
-
-## Solution Overview
-This recipe uses a Hyper-V virtual switch to bridge the WSL 2 network, providing improved control and visibility of Windows' network adapters within Ubuntu. The configuration supports both dynamic and static IP addressing, eliminating the need for port forwarding and simplifying network setup.
+## Overview
+Tunnel IP packets in a SSH channel.
 
 ### Steps
-1. **Enable Hyper-V and Management PowerShell Features:**
-   - Open PowerShell as administrator and run:
-     ```powershell
-     Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V
-     Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-Management-PowerShell
+1. **Enable tunnelling on server side:**
+   - Edit `/etc/ssh/sshd_config` and add the following line:
+     ```SSH Config
+     PermitTunnel yes
      ```
 
-3. **Change WSL Virtual Switch to External in Hyper-V:**
+2. **Change WSL Virtual Switch to External in Hyper-V:**
    - Open PowerShell as administrator and run:
      ```powershell
      Get-NetAdapter -Name * -Physical
@@ -34,7 +25,7 @@ This recipe uses a Hyper-V virtual switch to bridge the WSL 2 network, providing
 ![image](https://github.com/colemar/Win10WSL2UbuntuExternalIP/assets/3066000/f7a14b1b-5214-4e78-aa34-eb16a80ae66a)
 
 
-5. **Modify the WSL Configuration:**
+4. **Modify the WSL Configuration:**
    - **Do not** use `networkingMode = bridged` in the `.wslconfig` file in your user profile directory (`$env:USERPROFILE/.wslconfig`).
    - Instead, use `networkingMode = NAT` (the default) or remove it altogether.
 
