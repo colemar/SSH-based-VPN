@@ -13,10 +13,10 @@ Optional: use the VPN to access the Internet from the client using the server pu
    - Create a tunnel device owned by a regular user: `openvpn --mktun --dev tun1 --user username2`
    - Check tunnel device ownership: `ip -d link show tun1` (look for "user username2" in third line)
    - Assign IP address in minimal network range and bring up the tun1 interface:
-   ```
-   ip address add 10.1.0.2/22 dev tun1
-   ip link set tun1 up
-   ```
+     ```
+     ip address add 10.1.0.2/22 dev tun1
+     ip link set tun1 up
+     ```
      
 2. **Enable tunneling on client side:**
    - Log in as root or use `sudo`.
@@ -44,22 +44,21 @@ In order to make client's Internet traffic go through the VPN and appear as comi
 ### Access the Internet through the VPN
 
 1. **Enable routing and masquerading on server side:**
-   - Login as root or use `sudo`
+   - Log in as root or use `sudo`
    - Make a permanent setting (it survives reboot): edit /etc/sysctl.conf and add or modify the line `net.ipv4.ip_forward=1`
-   - Avoid having to reboot: `sysctl -w net.ipv4.ip_forward=1`
-   - Alternative to above command: `echo 1 > /proc/sys/net/ipv4/ip_forward`
-   - Enable masquerading: `iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE`
+   - Avoid having to reboot in order to make the above setting effective: `sysctl -w net.ipv4.ip_forward=1`
+   - Alternative to sysctl command: `echo 1 > /proc/sys/net/ipv4/ip_forward`
+   - Enable masquerading: `iptables -t nat -A POSTROUTING -o <if-name> -j MASQUERADE`. Here \<if-name\> (usually `eth0`) is the physical device attached to the public external network (see `ip route list default`).
 
 2. **Amend routing table on client side:**
-   - Login as root or use `sudo`.
-   - Add host route for remote server (this is to protect the above ssh session's connection):
-   ```
-   ip route add <server-ip-address> via <gateway-ip-address> dev <if-name>
-   ```
-   where \<if-name\> (most likely `eth0`) and \<gateway-ip-address\> are the same as the existing default route (see `ip route list default`).
+   - Log in as root or use `sudo`.
+   - Add an host route through the physical network for remote server (this is to protect the above ssh session's connection). Here \<if-name\> (e.g. `eth0`) and \<gateway-ip-address\> are the same as the existing default route trough the public external network (see `ip route list default`): 
+     ```
+     ip route add \<server-ip-address\> via \<gateway-ip-address\> dev \<if-name\>
+     ```
    - Add global network routes through the tunnel:
-   ```
-   route add 127.0.0.0/1 dev tun1
-   route add 0.0.0.0/1 dev tun1
-   ```
+     ```
+     route add 127.0.0.0/1 dev tun1
+     route add 0.0.0.0/1 dev tun1
+     ```
    
