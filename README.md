@@ -45,20 +45,40 @@ In order to make client's Internet traffic go through the VPN and appear as comi
 
 1. **Enable routing and masquerading on server side:**
    - Log in as root or use `sudo`
-   - Make a permanent setting (it survives reboot): edit /etc/sysctl.conf and add or modify the line `net.ipv4.ip_forward=1`
+   - Make a persistent setting (it survives reboot): edit /etc/sysctl.conf and add or modify the line `net.ipv4.ip_forward=1`
    - Avoid having to reboot in order to make the above setting effective: `sysctl -w net.ipv4.ip_forward=1`
-   - Alternative to sysctl command: `echo 1 > /proc/sys/net/ipv4/ip_forward`
+   - Alternative to sysctl: `echo 1 > /proc/sys/net/ipv4/ip_forward`
    - Enable masquerading: `iptables -t nat -A POSTROUTING -o <if-name> -j MASQUERADE`. Here \<if-name\> (usually `eth0`) is the physical device attached to the public external network (see `ip route list default`).
+   - Configure forwarding rules. By default, iptables will forward all traffic unconditionally. You probably want to restrict inbound traffic from the internet, but allow all outgoing:
+     ```
+     # Allow traffic from internal to external
+     iptables -A FORWARD -i tun1 -o eth0 -j ACCEPT
+     # Allow returning traffic from external to internal
+     iptables -A FORWARD -i eth0 -o tun1 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+     # Drop all other traffic that shouldn't be forwarded
+     iptables -A FORWARD -j DROP
+     ```
+   - Persist these iptables settings after reboot:
+     ```
+     apt install iptables-persistent
+     
+     ```
 
 2. **Amend routing table on client side:**
    - Log in as root or use `sudo`.
    - Add an host route through the physical network for remote server (this is to protect the above ssh session's connection). Here \<if-name\> (e.g. `eth0`) and \<gateway-ip-address\> are the same as the existing default route trough the public external network (see `ip route list default`): 
      ```
-     ip route add \<server-ip-address\> via \<gateway-ip-address\> dev \<if-name\>
+     ip route add <server-ip-address> via <gateway-ip-address> dev <if-name>
      ```
    - Add global network routes through the tunnel:
      ```
-     route add 127.0.0.0/1 dev tun1
-     route add 0.0.0.0/1 dev tun1
+     ip route add 127.0.0.0/1 dev tun1
+     ip route add 0.0.0.0/1 dev tun1
      ```
+
+3. **Check:**
+   - Log in on client as regular user.
+   - `ip route get 1.1.1.1` -> `1.1.1.1 dev tun1 ...`
+   - `ping 1.1.1.1` -> `64 bytes from 1.1.1.1: icmp_seq=1 ...`
+   - `curl ipinfo.io/ip` -> \<server-ip-address\>
    
