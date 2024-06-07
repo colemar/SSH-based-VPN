@@ -3,31 +3,24 @@ Tunnel IP packets in a SSH channel.
 
 ### Steps
 1. **Enable tunnelling on server side:**
+   - Login as root or use `sudo`.
    - Edit `/etc/ssh/sshd_config` and add the following line:
      ```SSH Config
      PermitTunnel yes
      ```
-
-2. **Change WSL Virtual Switch to External in Hyper-V:**
-   - Open PowerShell as administrator and run:
-     ```powershell
-     Get-NetAdapter -Name * -Physical
-     ```
-     ![image](https://github.com/colemar/Win10WSL2UbuntuExternalIP/assets/3066000/90f16024-2e61-45cf-b4b2-de957505bde2)
-     ```powershell
-     Set-VMSwitch WSL -SwitchType External -NetAdapterName "Wired"
-     ```
-   - If the above commmand fails, try:
-     ```powershell
-     Set-VMSwitch WSL -SwitchType External -NetAdapterInterfaceDescription "Realtek PCIe GBE Family Controller #2"
-     ```
-   - If it fails again, do it via Hyper-V manager / Virtual Switch Manager:
-![image](https://github.com/colemar/Win10WSL2UbuntuExternalIP/assets/3066000/f7a14b1b-5214-4e78-aa34-eb16a80ae66a)
-
-
-4. **Modify the WSL Configuration:**
-   - **Do not** use `networkingMode = bridged` in the `.wslconfig` file in your user profile directory (`$env:USERPROFILE/.wslconfig`).
-   - Instead, use `networkingMode = NAT` (the default) or remove it altogether.
+   - Restart sshd service: `systemctl restart sshd`
+   - Create a tunnel device owned by a regular user: `openvpn --mktun --dev tun1 --user username2`
+   - Check tunnel device ownership: `ip -d link show tun1` (look for "user username2" in third line)
+     
+2. **Enable tunnelling on client side:**
+   - Login as root or use `sudo`.
+   - Create a tunnel device owned by a regular user: `openvpn --mktun --dev tun1 --user username1`
+   - Check tunnel device ownership: `ip -d link show tun1` (look for "user username1" in third line)
+   
+3. **Adjust route table on client side:**
+   - Login as root or use `sudo`.
+   - Add host route for remote server: `ip route add <server-ip-address> via <default-gateway-ip-address> dev <if-name> ` where <if-name> is most likely `eth0`.
+   - Add global network routes.
 
 6. **Enable systemd in the WSL Distribution and flush ip configuration at boot:**
    - Edit the `/etc/wsl.conf` file in your WSL distribution and add the following lines:
