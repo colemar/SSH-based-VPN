@@ -1,8 +1,8 @@
 ## Overview
-Tunnel IP packets in a SSH channel and get a point-to-point VPN.
+Tunnel IP packets in a SSH channel and get a point-to-point VPN.  
 Optional: use the VPN to access the Internet from the client using the server public IP address.
 
-### Steps
+### Build the point-to-point VPN
 1. **Enable tunneling on server side:**
    - Log in as root or use `sudo`.
    - Edit `/etc/ssh/sshd_config` and add the following line:
@@ -41,20 +41,22 @@ At this point **tun1** on client side along with the **ssh channel** and **tun1*
 
 In order to make client's Internet traffic go through the VPN and appear as coming from the server IP, it is necessary to enable routing and masquerating (NAT) on the server and amend the routing table on the client.
 
-/etc/sysctl.conf
-net.ipv4.ip_forward=1
-sysctl -w net.ipv4.ip_forward=1
-echo 1 > /proc/sys/net/ipv4/ip_forward
+### Access the Internet through the VPN
 
-iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+1. **Enable routing and masquerading on server side:**
+   - Login as root or use `sudo`
+   - Make a permanent setting (it survives reboot): edit /etc/sysctl.conf and add or modify the line `net.ipv4.ip_forward=1`
+   - Avoid having to reboot: `sysctl -w net.ipv4.ip_forward=1`
+   - Alternative to above command: `echo 1 > /proc/sys/net/ipv4/ip_forward`
+   - Enable masquerading: `iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE`
 
-5. **Adjust route table on client side:**
+2. **Amend routing table on client side:**
    - Login as root or use `sudo`.
-   - Add host route for remote server (this is to protect the above ssh session):
+   - Add host route for remote server (this is to protect the above ssh session's connection):
    ```
    ip route add <server-ip-address> via <gateway-ip-address> dev <if-name>
    ```
-   where <if-name> is most likely `eth0` and <gateway-ip-address> is the same as the existing default route (see `ip route list default`).
+   where \<if-name\> (most likely `eth0`) and \<gateway-ip-address\> are the same as the existing default route (see `ip route list default`).
    - Add global network routes through the tunnel:
    ```
    route add 127.0.0.0/1 dev tun1
