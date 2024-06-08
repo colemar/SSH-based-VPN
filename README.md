@@ -47,7 +47,7 @@ In order to make client's Internet traffic go through the VPN and appear as comi
    - Make a persistent setting (it survives reboot): edit /etc/sysctl.conf and add or modify the line `net.ipv4.ip_forward=1`
    - Avoid having to reboot in order to make the above setting effective: `sysctl -w net.ipv4.ip_forward=1`
    - Alternative to sysctl: `echo 1 > /proc/sys/net/ipv4/ip_forward`
-   - Enable masquerading: `iptables -t nat -A POSTROUTING -o <if-name> -j MASQUERADE`. Here \<if-name\> (usually `eth0`) is the physical device attached to the public external network (see `ip route list default`).
+   - Enable masquerading: `iptables -t nat -A POSTROUTING -o <if-name> -j MASQUERADE`. Here \<if-name\> (usually `eth0`) is the physical device attached to the external network (see `ip route list default`).
    - Optional: configure forwarding rules. By default, iptables will forward all traffic unconditionally. You probably want to restrict inbound traffic from the internet, but allow all outgoing:
      ```
      # Allow traffic from internal to external
@@ -61,7 +61,7 @@ In order to make client's Internet traffic go through the VPN and appear as comi
 
 2. **Amend routing table on client side:**
    - Log in as root or use `sudo`.
-   - Add an host route through the physical network for remote server (this is to protect the above ssh session's connection). Here \<if-name\> (e.g. `eth0`) and \<gateway-ip-address\> are the same as the existing default route trough the public external network (see `ip route list default`): 
+   - Add an host route through the physical network for remote server (this is to protect the above ssh session's connection). Here \<if-name\> (e.g. `eth0`) and \<gateway-ip-address\> are the same as the existing default route trough the physical network (see `ip route list default`): 
      ```
      ip route add <server-ip-address> via <gateway-ip-address> dev <if-name>
      ```
@@ -70,6 +70,7 @@ In order to make client's Internet traffic go through the VPN and appear as comi
      ip route add 128.0.0.0/1 dev tun1
      ip route add 0.0.0.0/1 dev tun1
      ```
+     A single `ip route add default dev tun1` also seems to work, altough having two more specific routes as above ensures they override the existing default route through the physical network.
 
 3. **Check that Internet access is through the VPN:**
    - Log in on client as regular user.
