@@ -67,7 +67,7 @@ In order to make client's Internet traffic go through the VPN and appear as comi
      ```
    - Add global network routes through the tunnel:
      ```
-     ip route add 127.0.0.0/1 dev tun1
+     ip route add 128.0.0.0/1 dev tun1
      ip route add 0.0.0.0/1 dev tun1
      ```
 
