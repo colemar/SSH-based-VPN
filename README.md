@@ -10,9 +10,9 @@ Optional: use the VPN to access the Internet from the client using the server pu
    - Create a tunnel device owned by a regular user: `ip tuntap add dev tun1 mode tun user username2`
    - Alternative to above ip command: `openvpn --mktun --dev tun1 --user username2`
    - Check tunnel device ownership: `ip -d link show tun1` (look for "user username2" in third line)
-   - Assign IP address in minimal network range and bring up the tun1 interface:
+   - Assign IP address and bring up the tun1 interface:
      ```
-     ip address add 10.1.0.2/30 dev tun1
+     ip address add 10.1.0.2 peer 10.1.0.1 dev tun1
      ip link set tun1 up
      ```
      
@@ -21,9 +21,9 @@ Optional: use the VPN to access the Internet from the client using the server pu
    - Create a tunnel device owned by a regular user: `ip tuntap add dev tun1 mode tun user username1`
    - Alternative to above ip command: `openvpn --mktun --dev tun1 --user username1`
    - Check tunnel device ownership: `ip -d link show tun1` (look for "user username1" in third line)
-   - Assign IP address in minimal network range and bring up the tun1 interface:
+   - Assign IP address and bring up the tun1 interface:
    ```
-   ip address add 10.1.0.1/30 dev tun1
+   ip address add 10.1.0.1 peer 10.1.0.2 dev tun1
    ip link set tun1 up
    ```
 
@@ -36,7 +36,7 @@ Optional: use the VPN to access the Internet from the client using the server pu
    - On server: `ping 10.1.0.1`
    - On client: `ping 10.1.0.2`
 
-At this point **tun1** on client side along with the **ssh channel** and **tun1** on server side form a **Virtual Private Network** 10.1.0.0/30 (range 10.1.0.0 to 10.1.0.3).
+At this point **tun1** on client side along with the **ssh channel** and **tun1** on server side form a **Virtual Private Network**.
 
 In order to make client's Internet traffic go through the VPN and appear as coming from the server IP, it is necessary to enable routing and masquerating (NAT) on the server and amend the routing table on the client.
 
