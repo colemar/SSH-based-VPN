@@ -7,21 +7,23 @@ Optional: use the VPN to access the Internet from the client using the server pu
    - Log in as root or use `sudo`.
    - Edit `/etc/ssh/sshd_config` and add the following line: `PermitTunnel yes`
    - Restart sshd service: `systemctl restart sshd`
-   - Create a tunnel device owned by a regular user: `openvpn --mktun --dev tun1 --user username2`
+   - Create a tunnel device owned by a regular user: `ip tuntap add dev tun1 mode tun user username2`
+   - Alternative to above ip command: `openvpn --mktun --dev tun1 --user username2`
    - Check tunnel device ownership: `ip -d link show tun1` (look for "user username2" in third line)
    - Assign IP address in minimal network range and bring up the tun1 interface:
      ```
-     ip address add 10.1.0.2/22 dev tun1
+     ip address add 10.1.0.2/30 dev tun1
      ip link set tun1 up
      ```
      
 2. **Enable tunneling on client side:**
    - Log in as root or use `sudo`.
-   - Create a tunnel device owned by a regular user: `openvpn --mktun --dev tun1 --user username1`
+   - Create a tunnel device owned by a regular user: `ip tuntap add dev tun1 mode tun user username1`
+   - Alternative to above ip command: `openvpn --mktun --dev tun1 --user username1`
    - Check tunnel device ownership: `ip -d link show tun1` (look for "user username1" in third line)
    - Assign IP address in minimal network range and bring up the tun1 interface:
    ```
-   ip address add 10.1.0.1/22 dev tun1
+   ip address add 10.1.0.1/30 dev tun1
    ip link set tun1 up
    ```
 
@@ -34,7 +36,7 @@ Optional: use the VPN to access the Internet from the client using the server pu
    - On server: `ping 10.1.0.1`
    - On client: `ping 10.1.0.2`
 
-At this point **tun1** on client side along with the **ssh channel** and **tun1** on server side form a **Virtual Private Network** 10.1.0.0/22 (range 10.1.0.0 to 10.1.0.3).
+At this point **tun1** on client side along with the **ssh channel** and **tun1** on server side form a **Virtual Private Network** 10.1.0.0/30 (range 10.1.0.0 to 10.1.0.3).
 
 In order to make client's Internet traffic go through the VPN and appear as coming from the server IP, it is necessary to enable routing and masquerating (NAT) on the server and amend the routing table on the client.
 
@@ -69,8 +71,9 @@ In order to make client's Internet traffic go through the VPN and appear as comi
      ip route add 0.0.0.0/1 dev tun1
      ```
 
-3. **Check:**
+3. **Check that Internet access is through the VPN:**
    - Log in on client as regular user.
+   - Please note that 1.1.1.1 is a public routable IP address assigned to Cloudflare.
    - `ip route get 1.1.1.1` -> `1.1.1.1 dev tun1 ...`
    - `ping 1.1.1.1` -> `64 bytes from 1.1.1.1: icmp_seq=1 ...`
    - `curl ipinfo.io/ip` -> \<server-ip-address\>
