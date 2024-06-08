@@ -74,7 +74,7 @@ In order to make client's Internet traffic go through the VPN and appear as comi
 3. **Check that Internet access is through the VPN:**
    - Log in on client as regular user.
    - Please note that 1.1.1.1 is a public routable IP address assigned to Cloudflare.
-   - `ip route get 1.1.1.1` -> `1.1.1.1 dev tun1 ...`
-   - `ping 1.1.1.1` -> `64 bytes from 1.1.1.1: icmp_seq=1 ...`
-   - `curl ipinfo.io/ip` -> \<server-ip-address\>
+   - `ip route get 1.1.1.1` → `1.1.1.1 dev tun1 ...`
+   - `ping 1.1.1.1` → `64 bytes from 1.1.1.1: icmp_seq=1 ...`
+   - `curl ipinfo.io/ip` → \<server-ip-address\>
    
