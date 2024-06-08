@@ -61,7 +61,7 @@ In order to make client's Internet traffic go through the VPN and appear as comi
 
 2. **Amend routing table on client side:**
    - Log in as root or use `sudo`.
-   - Add an host route through the physical network for remote server (this is to protect the above ssh session's connection). Here \<if-name\> (e.g. `eth0`) and \<gateway-ip-address\> are the same as the existing default route trough the physical network (see `ip route list default`): 
+   - Add an host route through the physical network for remote server (this is to protect the above ssh session's connection). Here \<if-name\> (e.g. eth0) and \<gateway-ip-address\> are the same as the existing default route trough the physical network (see `ip route list default`): 
      ```
      ip route add <server-ip-address> via <gateway-ip-address> dev <if-name>
      ```
